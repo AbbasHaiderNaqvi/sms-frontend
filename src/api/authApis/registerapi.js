@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8081/api"; // adjust to your backend
+const API_BASE_URL = "https://sms-backend-production-11bc.up.railway.app/api"; // adjust to your backend
 
 // Registration API
 export const registerUser = async (userData) => {
