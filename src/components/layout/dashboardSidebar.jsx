@@ -7,11 +7,11 @@ const DashboardSidebar = () => {
 
   const menuItems = [
     { path: '/dashboard', icon: 'fas fa-chart-bar', label: 'Dashboard' },
-    { path: '/students', icon: 'fas fa-users', label: 'Students' },
+    // { path: '/students', icon: 'fas fa-users', label: 'Students' },
     { path: '/fee-collection', icon: 'fas fa-money-bill-wave', label: 'Fee Management' },
-    { path: '/invoices', icon: 'fas fa-file-invoice', label: 'Invoices' },
-    { path: '/reports', icon: 'fas fa-chart-pie', label: 'Reports' },
-    { path: '/settings', icon: 'fas fa-cog', label: 'Settings' },
+    // { path: '/invoices', icon: 'fas fa-file-invoice', label: 'Invoices' },
+    // { path: '/reports', icon: 'fas fa-chart-pie', label: 'Reports' },
+    // { path: '/settings', icon: 'fas fa-cog', label: 'Settings' },
   ];
 
   return (

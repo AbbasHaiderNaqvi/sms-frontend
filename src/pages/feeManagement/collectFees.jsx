@@ -79,7 +79,7 @@ const CollectFees = () => {
           </div>
 
           <div className="form-group">
-            <label>Amount (₹) *</label>
+            <label>Amount (Rs) *</label>
             <input
               type="number"
               name="amount"
