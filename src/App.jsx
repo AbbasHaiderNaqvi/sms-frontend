@@ -7,6 +7,8 @@ import Dashboard from './pages/dashboard/dashboard';
 import AuthLayout from './components/layout/authLayout';
 import DashboardLayout from './components/layout/dashboardLayout'; 
 import FeeCollection from './pages/feeManagement/feeCollection';
+import CollectFees from './pages/feeManagement/collectFees';
+import PrintVoucher from './components/feeComponents/printVoucher';
 import './App.css';
 
 function App() {
@@ -41,6 +43,9 @@ function App() {
             <Dashboard />
           </DashboardLayout>
         } />
+          <Route path="/fees" element={<CollectFees />} />
+        <Route path="/print-voucher/:voucherNumber" element={<PrintVoucher />} />
+       
       </Routes>
     </Router>
   );

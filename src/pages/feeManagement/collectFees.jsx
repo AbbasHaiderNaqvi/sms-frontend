@@ -1,139 +1,149 @@
-// src/pages/FeeCollection/CollectFees.jsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';  // ✅ for navigation
+import GenerateVoucherModal from '../../components/feeComponents/feeVoucher';
+import VoucherList from '../../components/feeComponents/voucherList';
 
 const CollectFees = () => {
-  const [formData, setFormData] = useState({
-    studentId: '',
-    studentName: '',
-    class: '',
-    amount: '',
-    paymentDate: new Date().toISOString().split('T')[0],
-    paymentMethod: 'cash',
-    remarks: ''
-  });
+  const [activeTab, setActiveTab] = useState('generate');
+  const [vouchers, setVouchers] = useState([]);
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Fee collection data:', formData);
-    // Here you'll integrate with your API
-    alert('Fee collected successfully!');
+  const navigate = useNavigate(); // ✅ to navigate to print page
+
+  // Handle voucher generation
+  const handleVoucherGenerated = (newVoucher) => {
+    if (newVoucher) {
+      const voucherWithStatus = { 
+        ...newVoucher, 
+        status: 'generated', 
+        generatedDate: new Date().toISOString() 
+      };
+
+      setVouchers([...vouchers, voucherWithStatus]);
+
+      // ✅ Redirect to print page after generating
+      navigate(`/print-voucher/${voucherWithStatus.voucherNumber}`);
+    }
+    setIsVoucherModalOpen(false);
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  // Handle voucher submission (mark as paid)
+  const handleSubmitVoucher = (e) => {
+    e.preventDefault();
+    
+    if (!selectedVoucher) {
+      alert("Please select a voucher first");
+      return;
+    }
+
+    const updatedVouchers = vouchers.map(voucher => 
+      voucher.voucherNumber === selectedVoucher.voucherNumber 
+        ? { ...voucher, status: 'paid', paidDate: new Date().toISOString() } 
+        : voucher
+    );
+    
+    setVouchers(updatedVouchers);
+    setSelectedVoucher(null);
+
+    console.log("Marking voucher as paid:", selectedVoucher.voucherNumber);
   };
 
   return (
     <div className="collect-fees">
-      <h2>Collect Student Fees</h2>
+      <div className="section-header">
+        <h2>Collect Student Fees</h2>
+      </div>
       
-      <form onSubmit={handleSubmit} className="fee-form">
-        <div className="form-grid">
+      {/* Tab Navigation */}
+      <div className="tabs">
+        <button 
+          className={`tab-btn ${activeTab === 'generate' ? 'active' : ''}`}
+          onClick={() => setActiveTab('generate')}
+        >
+          Generate Voucher
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'submit' ? 'active' : ''}`}
+          onClick={() => setActiveTab('submit')}
+        >
+          Submit Voucher
+        </button>
+      </div>
+      
+      {/* Generate Voucher Tab */}
+      {activeTab === 'generate' && (
+        <div className="tab-content">
           <div className="form-group">
-            <label>Student ID *</label>
-            <input
-              type="text"
-              name="studentId"
-              value={formData.studentId}
-              onChange={handleChange}
-              required
-              placeholder="Enter student ID"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Student Name *</label>
-            <input
-              type="text"
-              name="studentName"
-              value={formData.studentName}
-              onChange={handleChange}
-              required
-              placeholder="Enter student name"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Class *</label>
-            <select
-              name="class"
-              value={formData.class}
-              onChange={handleChange}
-              required
+            <button 
+              className="btn-primary"
+              onClick={() => setIsVoucherModalOpen(true)}
             >
-              <option value="">Select Class</option>
-              <option value="1">Grade 1</option>
-              <option value="2">Grade 2</option>
-              <option value="3">Grade 3</option>
-              <option value="4">Grade 4</option>
-              <option value="5">Grade 5</option>
-              <option value="6">Grade 6</option>
-              <option value="7">Grade 7</option>
-              <option value="8">Grade 8</option>
-              <option value="9">Grade 9</option>
-              <option value="10">Grade 10</option>
-            </select>
+              <i className="fas fa-receipt"></i> Generate New Voucher
+            </button>
           </div>
-
-          <div className="form-group">
-            <label>Amount (Rs) *</label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
-              required
-              placeholder="Enter amount"
-              min="0"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Payment Date *</label>
-            <input
-              type="date"
-              name="paymentDate"
-              value={formData.paymentDate}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Payment Method *</label>
-            <select
-              name="paymentMethod"
-              value={formData.paymentMethod}
-              onChange={handleChange}
-              required
-            >
-              <option value="cash">Cash</option>
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="cheque">Cheque</option>
-              <option value="online">Online Payment</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="form-group full-width">
-          <label>Remarks</label>
-          <textarea
-            name="remarks"
-            value={formData.remarks}
-            onChange={handleChange}
-            placeholder="Additional notes (optional)"
-            rows="3"
+          
+          <VoucherList 
+            vouchers={vouchers.filter(v => v.status === 'generated')}
+            title="Generated Vouchers (Unpaid)"
           />
         </div>
+      )}
+      
+      {/* Submit Voucher Tab */}
+      {activeTab === 'submit' && (
+        <div className="tab-content">
+          <form onSubmit={handleSubmitVoucher} className="fee-form">
+            <div className="form-group">
+              <label>Select Voucher to Mark as Paid</label>
+              <select 
+                value={selectedVoucher ? selectedVoucher.voucherNumber : ''}
+                onChange={(e) => {
+                  const voucher = vouchers.find(v => v.voucherNumber === e.target.value);
+                  setSelectedVoucher(voucher);
+                }}
+                required
+              >
+                <option value="">Select a voucher</option>
+                {vouchers
+                  .filter(v => v.status === 'generated')
+                  .map(voucher => (
+                    <option key={voucher.voucherNumber} value={voucher.voucherNumber}>
+                      #{voucher.voucherNumber} - {voucher.studentName} - ${voucher.amount}
+                    </option>
+                  ))
+                }
+              </select>
+            </div>
 
-        <button type="submit" className="submit-btn">
-          <i className="fas fa-check"></i>
-          Collect Fee
-        </button>
-      </form>
+            {selectedVoucher && (
+              <div className="voucher-details">
+                <h4>Voucher Details</h4>
+                <p><strong>Student:</strong> {selectedVoucher.studentName}</p>
+                <p><strong>Amount:</strong> ${selectedVoucher.amount}</p>
+                <p><strong>Generated on:</strong> {new Date(selectedVoucher.generatedDate).toLocaleDateString()}</p>
+              </div>
+            )}
+
+            <button type="submit" className="btn-primary">
+              Mark as Paid
+            </button>
+          </form>
+          
+          <VoucherList 
+            vouchers={vouchers.filter(v => v.status === 'paid')}
+            title="Paid Vouchers"
+          />
+        </div>
+      )}
+      
+      {isVoucherModalOpen && (
+        <GenerateVoucherModal
+          isOpen={isVoucherModalOpen}
+          onClose={() => setIsVoucherModalOpen(false)}
+          onVoucherGenerated={handleVoucherGenerated}
+        />
+      )}
     </div>
   );
 };
